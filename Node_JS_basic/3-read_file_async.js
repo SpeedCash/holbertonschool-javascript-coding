@@ -9,6 +9,11 @@ function countStudents(path) {
       }
 
       const lines = data.trim().split('\n');
+      if (lines.length === 0) {
+        reject(new Error('Cannot load the database'));
+        return;
+      }
+
       const fields = {};
       let totalStudents = 0;
       lines.shift(); // Remove header
