@@ -1,6 +1,5 @@
 const fs = require('fs');
 
-
 function countStudents(path) {
   return new Promise((resolve, reject) => {
     fs.readFile(path, 'utf8', (err, data) => {
@@ -11,10 +10,12 @@ function countStudents(path) {
 
       const lines = data.trim().split('\n');
       const fields = {};
+      let totalStudents = 0;
       lines.shift(); // Remove header
 
       lines.forEach((line) => {
         if (line.trim()) {
+          totalStudents += 1;
           const [firstname, lastname, age, field] = line.split(',');
           if (!fields[field]) {
             fields[field] = [];
@@ -23,11 +24,10 @@ function countStudents(path) {
         }
       });
 
-      const totalStudents = lines.length;
-      console.log(\`Number of students: \${totalStudents}\`);
+      console.log(`Number of students: ${totalStudents}`);
 
       for (const [field, students] of Object.entries(fields)) {
-        console.log(\`Number of students in \${field}: \${students.length}. List: \${students.join(', ')}\`);
+        console.log(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
       }
 
       resolve();
