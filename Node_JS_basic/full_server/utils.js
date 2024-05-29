@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-function readDatabase(path) {
+function readDatabase(filePath) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, data) => {
+    fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {
         reject(new Error('Cannot load the database'));
         return;
@@ -10,15 +10,16 @@ function readDatabase(path) {
 
       const lines = data.trim().split('\n');
       const fields = {};
-      lines.shift(); // Remove header
 
       lines.forEach((line) => {
         if (line.trim()) {
-          const [firstname, lastname, age, field] = line.split(',');
-          if (!fields[field]) {
-            fields[field] = [];
+          const [firstname, , , field] = line.split(',');
+          if (field && field !== 'field') {
+            if (!fields[field]) {
+              fields[field] = [];
+            }
+            fields[field].push(firstname);
           }
-          fields[field].push(firstname);
         }
       });
 
