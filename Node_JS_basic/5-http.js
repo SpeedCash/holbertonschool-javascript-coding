@@ -1,50 +1,27 @@
 const http = require('http');
-const fs = require('fs');
-
-const countStudents = (path) => new Promise((resolve, reject) => {
-  fs.readFile(path, 'utf8', (err, data) => {
-    if (err) {
-      reject(new Error('Cannot load the database'));
-      return;
-    }
-
-    const lines = data.trim().split('\n');
-    const fields = {};
-    lines.shift(); // Remove header
-
-    lines.forEach((line) => {
-      if (line.trim()) {
-        const [firstname, lastname, age, field] = line.split(',');
-        if (!fields[field]) {
-          fields[field] = [];
-        }
-        fields[field].push(firstname);
-      }
-    });
-
-    const totalStudents = lines.length;
-
-    resolve({ totalStudents, fields });
-  });
-});
+const url = require('url');
+const countStudents = require('./3-read_file_async');
 
 const app = http.createServer((req, res) => {
-  if (req.url === '/') {
+  const reqUrl = url.parse(req.url, true);
+
+  if (reqUrl.pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Hello Holberton School!');
-  } else if (req.url === '/students') {
-    countStudents(process.argv[2])
-      .then(({ totalStudents, fields }) => {
+    res.write('Hello Holberton School!');
+    res.end();
+  } else if (reqUrl.pathname === '/students') {
+    const databaseFile = process.argv[2];
+
+    countStudents(databaseFile)
+      .then(() => {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.write(`Number of students: ${totalStudents}\n`);
-        for (const [field, students] of Object.entries(fields)) {
-          res.write(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}\n`);
-        }
+        res.write('This is the list of our students\n');
         res.end();
       })
-      .catch((error) => {
+      .catch((err) => {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end(error.message);
+        res.write(err.message);
+        res.end();
       });
   }
 });
